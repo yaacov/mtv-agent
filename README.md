@@ -3,6 +3,11 @@
 AI agent for [MTV/Forklift](https://github.com/kubev2v/forklift) VM migrations,
 with a tool loop, MCP tool integration, and markdown-based skills and playbooks.
 
+<div align="center">
+  <img src="docs/mtv-agent-v0.1.0.png" alt="mtv-agent web UI" width="800" />
+  <p><em>mtv-agent v0.1.0 — chat interface with live migration metrics and plan status</em></p>
+</div>
+
 ## Quick start
 
 ```bash
