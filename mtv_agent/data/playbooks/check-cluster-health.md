@@ -55,7 +55,8 @@ metrics_read { "command": "query", "flags": { "query": "ceph_cluster_total_bytes
 metrics_read { "command": "query", "flags": { "query": "ceph_cluster_total_used_bytes / ceph_cluster_total_bytes * 100", "output": "markdown" } }
 ```
 
-Convert bytes to human-readable units (GB/TB).
+Convert bytes to human-readable units (GB/TB). Save the used, total, and percentage
+values -- these are what you will report in the summary table.
 
 **IF percentage > 80**: mark status as WARN (approaching full threshold of 85%).
 **IF percentage > 85**: mark status as ERR (at or above full threshold).
@@ -64,7 +65,7 @@ Convert bytes to human-readable units (GB/TB).
 ### Step 3 -- Check node status
 
 ```json
-debug_read { "command": "list", "flags": { "resource": "nodes", "all-namespaces": true, "output": "markdown" } }
+debug_read { "command": "list", "flags": { "resource": "nodes", "output": "markdown" } }
 ```
 
 **IF any node is NotReady**: mark status as ERR, list the affected nodes.

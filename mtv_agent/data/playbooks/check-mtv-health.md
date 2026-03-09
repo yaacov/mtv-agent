@@ -31,8 +31,8 @@ The output lists MTV components and their status (operator version, pods, provid
 Note the **operator namespace** from the output (typically `openshift-mtv` but can vary).
 Save it as `<MTV_NAMESPACE>` for use in later steps.
 
-**IF PASS** (all components healthy): skip to step 5 (Report).
-**IF FAIL** (any component shows errors or warnings): continue to step 2.
+**IF PASS** (all components healthy or minor warnings): skip to step 5 (Report).
+**IF FAIL** (any component shows errors): continue to step 2.
 
 ### Step 2 -- Inspect forklift pods
 

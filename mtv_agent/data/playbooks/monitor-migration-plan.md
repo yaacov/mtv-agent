@@ -10,6 +10,7 @@ tools:
   - debug_read (server: kubectl-debug-queries)
 skills:
   - metrics-tool-guide
+  - metrics-query-cookbook
 ---
 
 # Monitor Migration Plan
@@ -25,6 +26,12 @@ across the system, use the `migration-status-report` playbook instead.
 Collect before starting:
 - **namespace** -- check session context first; **ASK the user** only if missing.
 - **plan name** -- resolved in step 1 (do NOT assume which plan to monitor).
+
+## Notes
+
+- The MTV operator namespace is usually `openshift-mtv` (shown as `<MTV_NAMESPACE>` below).
+  If unsure, run `mtv_read { "command": "health", "flags": { "all_namespaces": true } }` first
+  and note the namespace from the output.
 
 ## Steps
 
@@ -53,15 +60,19 @@ Look for the migration start and completion timestamps in the output.
 If timestamps are not visible, fall back to JSON:
 
 ```json
-mtv_read { "command": "get plan", "flags": { "name": "<PLAN_NAME>", "namespace": "<NAMESPACE>", "output": "json" }, "fields": ["name", "status"] }
+mtv_read { "command": "get plan", "flags": { "name": "<PLAN_NAME>", "namespace": "<NAMESPACE>", "output": "json" } }
 ```
 
 Check `.status.migration.started` and `.status.migration.completed` fields.
 Save `<START>` and `<END>` as ISO 8601 timestamps (e.g. `2025-06-15T10:00:00Z`).
 
+Example: if `started = "2025-06-15T10:00:00Z"` and the migration is still running,
+use `<START> = "2025-06-15T10:00:00Z"` and omit `<END>` (the tool defaults to now).
+If `completed = "2025-06-15T12:30:00Z"`, use that as `<END>`.
+If you cannot extract timestamps, fall back to `<START> = "-1h"` (relative).
+
 **IF no timestamps found** (plan may not have started yet): note this and use
-the last 1 hour as the time window for metrics. Tell the user the plan may not
-have started migrating yet.
+`"-1h"` as `<START>`. Tell the user the plan may not have started migrating yet.
 
 ### Step 3 -- Show VM-level progress
 
@@ -139,7 +150,7 @@ debug_read { "command": "events", "flags": { "namespace": "<NAMESPACE>", "query"
 Check controller logs for the plan:
 
 ```json
-mtv_read { "command": "health logs", "flags": { "namespace": "openshift-mtv", "filter_plan": "<PLAN_NAME>", "filter_level": "error", "output": "markdown" } }
+mtv_read { "command": "health logs", "flags": { "namespace": "<MTV_NAMESPACE>", "filter_plan": "<PLAN_NAME>", "filter_level": "error", "output": "markdown" } }
 ```
 
 ### Step 8 -- Report
@@ -151,7 +162,10 @@ Present a summary with:
 - Disk transfer completion percentage
 - Network throughput (peak and average RX/TX in MB/s)
 - Storage throughput (peak and average in MB/s)
-- Estimated time remaining if the migration is still running
+- Estimated time remaining (if still running): use disk transfer percentage from step 4
+  and elapsed time. Example: 40% complete after 30 min means ~45 min remaining
+  (elapsed * remaining% / completed%). If percentage data is not available, say
+  "estimate not available"
 
 **IF all VMs succeeded**: report success, total duration, total data transferred.
 **IF some VMs failed**: list the failed VMs with error details from step 7.

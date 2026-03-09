@@ -86,13 +86,18 @@ Only run this step if step 1 found failed migrations (Failed count > 0).
 Get the failed plan details:
 
 ```json
-mtv_read { "command": "get plan", "flags": { "all_namespaces": true, "output": "json" }, "fields": ["name", "status", "namespace"] }
+mtv_read { "command": "get plan", "flags": { "all_namespaces": true, "output": "json" } }
 ```
 
-For each failed plan, check error logs:
+From the JSON output, find plans where the status indicates failure (look for `"Failed"`
+in the status fields). Extract each plan's `name` and `namespace`.
+Investigate up to 3 failed plans to keep the report focused.
+
+For each failed plan, check error logs (the MTV operator namespace is usually
+`openshift-mtv`; if unsure, run `mtv_read health` first to detect it):
 
 ```json
-mtv_read { "command": "health logs", "flags": { "namespace": "openshift-mtv", "filter_plan": "<PLAN_NAME>", "filter_level": "error", "output": "markdown" } }
+mtv_read { "command": "health logs", "flags": { "namespace": "<MTV_NAMESPACE>", "filter_plan": "<PLAN_NAME>", "filter_level": "error", "output": "markdown" } }
 ```
 
 Check warning events in the plan's namespace:

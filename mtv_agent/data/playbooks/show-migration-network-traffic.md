@@ -43,13 +43,17 @@ mtv_read { "command": "describe plan", "flags": { "name": "<PLAN_NAME>", "namesp
 Look for start and completion timestamps. If not visible, fall back to:
 
 ```json
-mtv_read { "command": "get plan", "flags": { "name": "<PLAN_NAME>", "namespace": "<NAMESPACE>", "output": "json" }, "fields": ["name", "status"] }
+mtv_read { "command": "get plan", "flags": { "name": "<PLAN_NAME>", "namespace": "<NAMESPACE>", "output": "json" } }
 ```
 
 Check `.status.migration.started` and `.status.migration.completed` fields.
-Compute the migration duration and use it as the rate window
-(e.g. if migration ran for 2 hours, use `[2h]`; if 30 minutes, use `[30m]`).
+Compute the migration duration and round up to the nearest Prometheus duration unit.
 Save this as `<RATE_WINDOW>`.
+
+Example: if `started = "2025-06-15T10:00:00Z"` and `completed = "2025-06-15T12:30:00Z"`,
+the duration is 2.5 hours -- use `[3h]`. If 45 minutes, use `[1h]`.
+If the migration is still running, use the time elapsed since start, rounded up.
+If you cannot determine timestamps, fall back to `[1h]` as a safe default.
 
 **IF FAIL** (plan not found): tell the user the plan was not found and **ASK** them
 to verify the name and namespace. Stop here until clarified.
@@ -82,7 +86,7 @@ metrics_read { "command": "query", "flags": { "query": "topk(10, sort_desc(sum b
 ### Step 4 -- Check for network errors and drops
 
 ```json
-metrics_read { "command": "preset", "flags": { "name": "mtv_network_errors", "output": "markdown" } }
+metrics_read { "command": "preset", "flags": { "name": "namespace_network_errors", "output": "markdown" } }
 ```
 
 **IF errors or drops found**: save them and flag the affected namespace/pod.

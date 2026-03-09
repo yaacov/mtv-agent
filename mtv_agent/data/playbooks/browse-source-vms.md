@@ -6,6 +6,9 @@ description: >
   Supports filtering by name, power state, resource size, or custom TSL query.
 tools:
   - mtv_read (server: kubectl-mtv)
+skills:
+  - inventory-tool-guide
+  - inventory-query-cookbook
 ---
 
 # Browse Source VMs
@@ -48,8 +51,8 @@ the user might want to filter and ask what criteria to use.
 
 Pick the matching call based on the filter criteria.
 
-**Output format**: Use `"output": "markdown"` for display. Use `"output": "json"` with
-`fields` only if you need to process results programmatically (e.g. counting, grouping).
+**Output format**: Use `"output": "markdown"` for display. Use `"output": "json"` only
+if you need to parse results programmatically (e.g. counting, grouping).
 
 **No filter (show all):**
 
