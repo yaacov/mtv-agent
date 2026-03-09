@@ -10,6 +10,7 @@ tools:
   - metrics_read (server: kubectl-metrics)
 skills:
   - metrics-tool-guide
+  - metrics-query-cookbook
 ---
 
 # Troubleshoot Migration
@@ -28,6 +29,12 @@ Collect before starting:
   - Disk transfer stalled
   - Migration very slow
   - Other (describe)
+
+## Notes
+
+- The MTV operator namespace is usually `openshift-mtv` (shown as `<MTV_NAMESPACE>` below).
+  If unsure, run `mtv_read { "command": "health", "flags": { "all_namespaces": true } }` first
+  and note the namespace from the output.
 
 ## Steps
 
@@ -63,7 +70,7 @@ Identify:
 ### Step 3 -- Check MTV controller logs for the plan
 
 ```json
-mtv_read { "command": "health logs", "flags": { "namespace": "openshift-mtv", "filter_plan": "<PLAN_NAME>", "filter_level": "error", "output": "markdown" } }
+mtv_read { "command": "health logs", "flags": { "namespace": "<MTV_NAMESPACE>", "filter_plan": "<PLAN_NAME>", "filter_level": "error", "output": "markdown" } }
 ```
 
 **IF errors found**: save them -- they often reveal the root cause (provider errors,
@@ -71,7 +78,7 @@ conversion failures, resource issues).
 **IF no errors at error level**: try warning level:
 
 ```json
-mtv_read { "command": "health logs", "flags": { "namespace": "openshift-mtv", "filter_plan": "<PLAN_NAME>", "filter_level": "warn", "output": "markdown" } }
+mtv_read { "command": "health logs", "flags": { "namespace": "<MTV_NAMESPACE>", "filter_plan": "<PLAN_NAME>", "filter_level": "warn", "output": "markdown" } }
 ```
 
 ### Step 4 -- Check migration pods in the target namespace
@@ -101,7 +108,7 @@ check events (step 5) and provider (step 6).
 debug_read { "command": "get", "flags": { "resource": "pod", "name": "<POD_NAME>", "namespace": "<NAMESPACE>", "output": "json" } }
 ```
 
-Look for `lastState.terminated.reason: OOMKilled` in container statuses.
+Look for `.status.containerStatuses[*].lastState.terminated.reason` equal to `"OOMKilled"`.
 
 ### Step 5 -- Check events in the target namespace
 
@@ -172,7 +179,7 @@ metrics_read { "command": "preset", "flags": { "name": "mtv_storage_throughput",
 or throttling. Check:
 
 ```json
-metrics_read { "command": "preset", "flags": { "name": "mtv_network_errors", "output": "markdown" } }
+metrics_read { "command": "preset", "flags": { "name": "namespace_network_errors", "output": "markdown" } }
 ```
 
 ### Step 10 -- Report
