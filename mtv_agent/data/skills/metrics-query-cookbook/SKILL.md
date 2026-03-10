@@ -239,7 +239,7 @@ metrics_read { "command": "preset", "flags": { "name": "pod_restarts_top10", "ou
 After finding pods with high restarts, use `debug_read` to get pod details and logs:
 
 ```json
-debug_read { "command": "list", "flags": { "resource": "pods", "namespace": "<NAMESPACE>", "query": "where Restarts > 5", "output": "markdown" } }
+debug_read { "command": "list", "flags": { "resource": "pods", "namespace": "<NAMESPACE>", "query": "where status.containerStatuses[0].restartCount > 5", "output": "markdown" } }
 ```
 
 ```json
@@ -432,7 +432,7 @@ metrics_read { "command": "preset", "flags": { "name": "mtv_migration_pod_rx", "
 To investigate migration pod issues alongside metrics:
 
 ```json
-debug_read { "command": "list", "flags": { "resource": "pods", "namespace": "<NAMESPACE>", "query": "where Name ~= '.*virt-v2v.*|.*populator.*|.*importer.*'", "output": "markdown" } }
+debug_read { "command": "list", "flags": { "resource": "pods", "namespace": "<NAMESPACE>", "selector": "plan", "output": "markdown" } }
 ```
 
 ```json

@@ -62,7 +62,7 @@ Check that the new provider appears and its status is Ready.
 **IF status is not Ready**: check events for clues:
 
 ```json
-debug_read { "command": "events", "flags": { "namespace": "<NAMESPACE>", "query": "where Type = 'Warning'", "limit": 10, "output": "markdown" } }
+debug_read { "command": "events", "flags": { "namespace": "<NAMESPACE>", "query": "where type = 'Warning'", "limit": 10, "output": "markdown" } }
 ```
 
 Report the provider status and any warning events to the user.

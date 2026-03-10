@@ -103,7 +103,7 @@ mtv_read { "command": "health logs", "flags": { "namespace": "<MTV_NAMESPACE>", 
 Check warning events in the plan's namespace:
 
 ```json
-debug_read { "command": "events", "flags": { "namespace": "<PLAN_NAMESPACE>", "query": "where Type = 'Warning'", "limit": 10, "output": "markdown" } }
+debug_read { "command": "events", "flags": { "namespace": "<PLAN_NAMESPACE>", "query": "where type = 'Warning'", "limit": 10, "output": "markdown" } }
 ```
 
 ### Step 7 -- Report

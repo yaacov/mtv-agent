@@ -98,13 +98,13 @@ Run this step only if steps 2-3 returned no traffic data or show zero traffic
 for pods that should be active.
 
 ```json
-debug_read { "command": "list", "flags": { "resource": "pods", "namespace": "<NAMESPACE>", "query": "where Name ~= '.*virt-v2v.*|.*populator.*|.*importer.*'", "output": "markdown" } }
+debug_read { "command": "list", "flags": { "resource": "pods", "namespace": "<NAMESPACE>", "selector": "plan", "output": "markdown" } }
 ```
 
 **IF pods are in error/pending state**: get their events:
 
 ```json
-debug_read { "command": "events", "flags": { "namespace": "<NAMESPACE>", "query": "where Type = 'Warning'", "limit": 10, "output": "markdown" } }
+debug_read { "command": "events", "flags": { "namespace": "<NAMESPACE>", "query": "where type = 'Warning'", "limit": 10, "output": "markdown" } }
 ```
 
 **IF no migration pods found at all**: tell the user there are no active migration pods

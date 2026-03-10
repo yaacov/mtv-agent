@@ -132,7 +132,7 @@ Only run this step if any VM shows Failed or appears stuck (no progress).
 Check migration pods in the target namespace:
 
 ```json
-debug_read { "command": "list", "flags": { "resource": "pods", "namespace": "<NAMESPACE>", "query": "where Name ~= '.*virt-v2v.*|.*populator.*|.*importer.*'", "output": "markdown" } }
+debug_read { "command": "list", "flags": { "resource": "pods", "namespace": "<NAMESPACE>", "selector": "plan", "output": "markdown" } }
 ```
 
 **IF pods are in error state**: get their logs:
@@ -144,7 +144,7 @@ debug_read { "command": "logs", "flags": { "name": "<POD_NAME>", "namespace": "<
 Check events for the namespace:
 
 ```json
-debug_read { "command": "events", "flags": { "namespace": "<NAMESPACE>", "query": "where Type = 'Warning'", "limit": 15, "output": "markdown" } }
+debug_read { "command": "events", "flags": { "namespace": "<NAMESPACE>", "query": "where type = 'Warning'", "limit": 15, "output": "markdown" } }
 ```
 
 Check controller logs for the plan:

@@ -109,7 +109,7 @@ Replace `<TIMESPAN>` with the collected value (e.g. `24h`, `7d`).
 ### Step 6 -- Check for problem pods
 
 ```json
-debug_read { "command": "list", "flags": { "resource": "pods", "all_namespaces": true, "query": "where Status != 'Running' and Status != 'Succeeded' and Status != 'Completed'", "limit": 15, "output": "markdown" } }
+debug_read { "command": "list", "flags": { "resource": "pods", "all_namespaces": true, "query": "where status.phase != 'Running' and status.phase != 'Succeeded'", "limit": 15, "output": "markdown" } }
 ```
 
 **IF problem pods found**: save them for the report.
@@ -118,7 +118,7 @@ debug_read { "command": "list", "flags": { "resource": "pods", "all_namespaces":
 ### Step 7 -- Check warning events cluster-wide
 
 ```json
-debug_read { "command": "events", "flags": { "all_namespaces": true, "query": "where Type = 'Warning'", "limit": 15, "output": "markdown" } }
+debug_read { "command": "events", "flags": { "all_namespaces": true, "query": "where type = 'Warning'", "limit": 15, "output": "markdown" } }
 ```
 
 **IF warning events found**: save the most recent ones for the report.

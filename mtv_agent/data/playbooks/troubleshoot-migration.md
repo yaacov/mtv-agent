@@ -84,7 +84,7 @@ mtv_read { "command": "health logs", "flags": { "namespace": "<MTV_NAMESPACE>", 
 ### Step 4 -- Check migration pods in the target namespace
 
 ```json
-debug_read { "command": "list", "flags": { "resource": "pods", "namespace": "<NAMESPACE>", "query": "where Name ~= '.*virt-v2v.*|.*populator.*|.*importer.*'", "output": "markdown" } }
+debug_read { "command": "list", "flags": { "resource": "pods", "namespace": "<NAMESPACE>", "selector": "plan", "output": "markdown" } }
 ```
 
 **IF pods found in error/pending/crash state**: get their logs:
@@ -113,7 +113,7 @@ Look for `.status.containerStatuses[*].lastState.terminated.reason` equal to `"O
 ### Step 5 -- Check events in the target namespace
 
 ```json
-debug_read { "command": "events", "flags": { "namespace": "<NAMESPACE>", "query": "where Type = 'Warning'", "limit": 20, "sort_by": "Last_Seen", "output": "markdown" } }
+debug_read { "command": "events", "flags": { "namespace": "<NAMESPACE>", "query": "where type = 'Warning' order by lastTimestamp desc", "limit": 20, "output": "markdown" } }
 ```
 
 **IF relevant events found**: save them. Common warning events during migration:
@@ -131,7 +131,7 @@ mtv_read { "command": "get provider", "flags": { "namespace": "<NAMESPACE>", "ou
 **IF source provider is not Ready**: the provider lost connectivity.
 
 ```json
-debug_read { "command": "events", "flags": { "namespace": "<NAMESPACE>", "resource": "Pod", "query": "where Type = 'Warning'", "limit": 10, "output": "markdown" } }
+debug_read { "command": "events", "flags": { "namespace": "<NAMESPACE>", "resource": "Pod", "query": "where type = 'Warning'", "limit": 10, "output": "markdown" } }
 ```
 
 ### Step 7 -- Check cluster resource pressure
@@ -150,7 +150,7 @@ scheduling failures for migration pods.
 ### Step 8 -- Check storage (PVC status)
 
 ```json
-debug_read { "command": "list", "flags": { "resource": "pvc", "namespace": "<NAMESPACE>", "query": "where Status != 'Bound'", "output": "markdown" } }
+debug_read { "command": "list", "flags": { "resource": "pvc", "namespace": "<NAMESPACE>", "query": "where status.phase != 'Bound'", "output": "markdown" } }
 ```
 
 **IF unbound PVCs found**: storage provisioning is failing.

@@ -39,13 +39,13 @@ Save it as `<MTV_NAMESPACE>` for use in later steps.
 Use the namespace detected in step 1:
 
 ```json
-debug_read { "command": "list", "flags": { "resource": "pods", "namespace": "<MTV_NAMESPACE>", "query": "where Status != 'Running' and Status != 'Succeeded'", "output": "markdown" } }
+debug_read { "command": "list", "flags": { "resource": "pods", "namespace": "<MTV_NAMESPACE>", "query": "where status.phase != 'Running' and status.phase != 'Succeeded'", "output": "markdown" } }
 ```
 
 If the above returns no results (all pods are Running), also check for high-restart pods:
 
 ```json
-debug_read { "command": "list", "flags": { "resource": "pods", "namespace": "<MTV_NAMESPACE>", "query": "where Restarts > 3", "output": "markdown" } }
+debug_read { "command": "list", "flags": { "resource": "pods", "namespace": "<MTV_NAMESPACE>", "query": "where status.containerStatuses[0].restartCount > 3", "output": "markdown" } }
 ```
 
 **IF unhealthy pods found**: collect their logs (step 2a).
@@ -68,7 +68,7 @@ debug_read { "command": "logs", "flags": { "name": "<POD_NAME>", "namespace": "<
 ### Step 3 -- Check warning events
 
 ```json
-debug_read { "command": "events", "flags": { "namespace": "<MTV_NAMESPACE>", "query": "where Type = 'Warning'", "limit": 20, "output": "markdown" } }
+debug_read { "command": "events", "flags": { "namespace": "<MTV_NAMESPACE>", "query": "where type = 'Warning'", "limit": 20, "output": "markdown" } }
 ```
 
 **IF warning events found**: save them for the report.
