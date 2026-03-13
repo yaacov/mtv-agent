@@ -90,6 +90,14 @@ export class ChatComposer extends LitElement {
       cursor: not-allowed;
     }
 
+    .send-btn.stop {
+      background: var(--status-error, #d32f2f);
+    }
+
+    .send-btn.stop:hover {
+      background: color-mix(in srgb, var(--status-error, #d32f2f) 85%, black);
+    }
+
     .send-btn .material-symbols-outlined {
       font-family: "Material Symbols Outlined";
       font-weight: normal;
@@ -179,7 +187,11 @@ export class ChatComposer extends LitElement {
     const ta = this.textarea;
     if (!ta) return;
     ta.style.height = "auto";
-    ta.style.height = Math.min(ta.scrollHeight, 200) + "px";
+    if (ta.scrollHeight > ta.clientHeight) {
+      ta.style.height = Math.min(ta.scrollHeight, 200) + "px";
+    } else {
+      ta.style.removeProperty("height");
+    }
   }
 
   private handleInput(e: InputEvent) {
@@ -211,6 +223,12 @@ export class ChatComposer extends LitElement {
         bubbles: true,
         composed: true,
       }),
+    );
+  }
+
+  private cancel() {
+    this.dispatchEvent(
+      new CustomEvent("cancel-stream", { bubbles: true, composed: true }),
     );
   }
 
@@ -249,17 +267,25 @@ export class ChatComposer extends LitElement {
           .value=${this.text}
           @input=${this.handleInput}
           @keydown=${this.handleKeyDown}
-          ?disabled=${this.isStreaming}
         ></textarea>
-        <button
-          class="send-btn"
-          @click=${this.send}
-          ?disabled=${this.isStreaming || !this.text.trim()}
-          title="Send message"
-          aria-label="Send message"
-        >
-          <span class="material-symbols-outlined">forklift</span>
-        </button>
+        ${this.isStreaming
+          ? html`<button
+              class="send-btn stop"
+              @click=${this.cancel}
+              title="Stop"
+              aria-label="Stop"
+            >
+              <span class="material-symbols-outlined">block</span>
+            </button>`
+          : html`<button
+              class="send-btn"
+              @click=${this.send}
+              ?disabled=${!this.text.trim()}
+              title="Send message"
+              aria-label="Send message"
+            >
+              <span class="material-symbols-outlined">forklift</span>
+            </button>`}
       </div>
     `;
   }
