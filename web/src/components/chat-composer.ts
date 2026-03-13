@@ -227,9 +227,7 @@ export class ChatComposer extends LitElement {
   }
 
   private cancel() {
-    this.dispatchEvent(
-      new CustomEvent("cancel-stream", { bubbles: true, composed: true }),
-    );
+    this.dispatchEvent(new CustomEvent("cancel-stream", { bubbles: true, composed: true }));
   }
 
   private formatTokens(n: number): string {
@@ -269,13 +267,8 @@ export class ChatComposer extends LitElement {
           @keydown=${this.handleKeyDown}
         ></textarea>
         ${this.isStreaming
-          ? html`<button
-              class="send-btn stop"
-              @click=${this.cancel}
-              title="Stop"
-              aria-label="Stop"
-            >
-              <span class="material-symbols-outlined">block</span>
+          ? html`<button class="send-btn stop" @click=${this.cancel} title="Stop" aria-label="Stop">
+              <span class="material-symbols-outlined">forklift</span>
             </button>`
           : html`<button
               class="send-btn"

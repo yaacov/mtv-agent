@@ -236,10 +236,16 @@ export class MarkdownRenderer extends LitElement {
 
   @property({ type: String }) content = "";
 
+  private _cacheKey = "";
+  private _cacheHtml = "";
+
   private renderMarkdown(): string {
     if (!this.content) return "";
+    if (this._cacheKey === this.content) return this._cacheHtml;
+    this._cacheKey = this.content;
     const raw = marked.parse(this.content) as string;
-    return DOMPurify.sanitize(raw);
+    this._cacheHtml = DOMPurify.sanitize(raw);
+    return this._cacheHtml;
   }
 
   render() {

@@ -587,7 +587,7 @@ dependencies = [
     { name = "uvicorn" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 dev = [
     { name = "ruff" },
 ]
@@ -602,11 +602,12 @@ requires-dist = [
     { name = "openai" },
     { name = "pydantic-settings" },
     { name = "pyyaml" },
-    { name = "ruff", marker = "extra == 'dev'" },
     { name = "sse-starlette" },
     { name = "uvicorn" },
 ]
-provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+dev = [{ name = "ruff" }]
 
 [[package]]
 name = "oauthlib"

@@ -24,7 +24,7 @@ Issues = "https://github.com/yaacov/mtv-agent/issues"
 [project.scripts]
 mtv-agent = "mtv_agent.cli:main"
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = ["ruff"]
 
 [build-system]
