@@ -31,6 +31,7 @@ export interface ChatMessage {
   content: string;
   toolCalls?: ToolCallEntry[];
   thinking?: boolean;
+  cancelled?: boolean;
   timestamp: number;
 }
 

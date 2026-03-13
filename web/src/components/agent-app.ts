@@ -119,6 +119,7 @@ export class AgentApp extends LitElement {
       }
     });
     this.addEventListener("send-message", this.onSendMessage as EventListener);
+    this.addEventListener("cancel-stream", this.onCancelStream as EventListener);
     this.addEventListener("load-chat", this.onLoadChat as unknown as EventListener);
     this.addEventListener("delete-chat", this.onDeleteChat as unknown as EventListener);
     this.addEventListener("pin-card", this.onPinCard as EventListener);
@@ -129,6 +130,7 @@ export class AgentApp extends LitElement {
     super.disconnectedCallback();
     this.unsubscribe?.();
     this.removeEventListener("send-message", this.onSendMessage as EventListener);
+    this.removeEventListener("cancel-stream", this.onCancelStream as EventListener);
     this.removeEventListener("load-chat", this.onLoadChat as unknown as EventListener);
     this.removeEventListener("delete-chat", this.onDeleteChat as unknown as EventListener);
     this.removeEventListener("pin-card", this.onPinCard as EventListener);
@@ -218,6 +220,24 @@ export class AgentApp extends LitElement {
   private onSendMessage = (e: CustomEvent<{ message: string }>) => {
     this.handleSend(e.detail.message);
   };
+
+  private onCancelStream = () => {
+    this.handleCancel();
+  };
+
+  private handleCancel() {
+    if (!this.abortController) return;
+    this.abortController.abort();
+    this.abortController = undefined;
+
+    appState.updateLastAssistant((m) => ({
+      ...m,
+      thinking: false,
+      content: m.content || "",
+      cancelled: true,
+    }));
+    appState.update({ isStreaming: false });
+  }
 
   private onLoadChat = async (e: CustomEvent<{ chatId: string }>) => {
     if (appState.state.isStreaming) return;
