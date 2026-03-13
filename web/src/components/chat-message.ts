@@ -122,6 +122,32 @@ export class ChatMessageEl extends LitElement {
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
+
+    .message.assistant.cancelled .bubble {
+      opacity: 0.7;
+      border-left: 3px solid #d32f2f;
+      padding-left: 8px;
+    }
+
+    .cancelled-label {
+      font-size: var(--font-size-xs);
+      color: #d32f2f;
+      font-style: italic;
+      margin-top: 2px;
+      padding: 0 4px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
   `;
 
   @property({ type: Object }) msg!: ChatMsg;
@@ -161,9 +187,10 @@ export class ChatMessageEl extends LitElement {
   render() {
     const m = this.msg;
     const isUser = m.role === "user";
+    const isCancelled = m.role === "assistant" && m.cancelled === true;
 
     return html`
-      <div class="message ${m.role}">
+      <div class="message ${m.role}${isCancelled ? " cancelled" : ""}">
         ${isUser ? nothing : html`<span class="role-label">Assistant</span>`}
         ${m.thinking ? html`<thinking-indicator></thinking-indicator>` : nothing}
         ${m.toolCalls?.length
@@ -200,7 +227,11 @@ export class ChatMessageEl extends LitElement {
                 </div>
               `
           : nothing}
-
+        ${isCancelled
+          ? html`<span class="cancelled-label" aria-label="This response was cancelled"
+              >cancelled<span class="sr-only"> — response was interrupted</span></span
+            >`
+          : nothing}
         <span class="timestamp">${this.formatTime(m.timestamp)}</span>
       </div>
     `;

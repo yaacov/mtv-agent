@@ -52,6 +52,23 @@ def _prepare_turn_messages(
     return turn
 
 
+def _checkpoint_messages(
+    messages: list[dict],
+    turn_start: int,
+    tool_result_limit: int,
+) -> list[dict]:
+    """Snapshot the current turn for incremental disk persistence.
+
+    Like *_prepare_turn_messages* but without appending a final assistant
+    reply (which doesn't exist yet mid-turn).
+    """
+    turn = copy.deepcopy(messages[turn_start:])
+    for msg in turn:
+        if msg.get("role") == "tool" and isinstance(msg.get("content"), str):
+            msg["content"] = truncate(msg["content"], tool_result_limit)
+    return turn
+
+
 async def run_stream(
     user_message: str,
     registry: ToolRegistry,
@@ -71,6 +88,7 @@ async def run_stream(
 
     Events:
         {"event": "thinking"}
+        {"event": "checkpoint",  "messages": [...]}
         {"event": "skill_selected", "name": "..."}
         {"event": "skill_cleared"}
         {"event": "context_set",   "key": "...", "value": "..."}
@@ -110,6 +128,11 @@ async def run_stream(
         {"role": "user", "content": user_message},
     ]
     turn_start = len(messages) - 1  # index of the new user message
+
+    yield {
+        "event": "checkpoint",
+        "messages": _checkpoint_messages(messages, turn_start, tool_result_limit),
+    }
 
     base_tools = registry.get_tool_definitions()
     skill_tool = make_select_skill_tool(skills)
@@ -251,6 +274,11 @@ async def run_stream(
                     "content": truncate(result, DEFAULT_TRUNCATE_LIMIT),
                 }
             )
+
+        yield {
+            "event": "checkpoint",
+            "messages": _checkpoint_messages(messages, turn_start, tool_result_limit),
+        }
 
     msg = "Reached maximum tool call iterations."
     turn = _prepare_turn_messages(messages, turn_start, msg, tool_result_limit)

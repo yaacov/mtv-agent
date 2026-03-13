@@ -209,13 +209,14 @@ async def chat_stream(
         return await approval_queue.get()
 
     async def event_generator():
+        turn_messages: list[dict] = []
+        last_checkpoint: list[dict] | None = None
         try:
             yield {
                 "event": "session",
                 "data": json.dumps({"session_id": sid}),
             }
 
-            turn_messages: list[dict] = []
             stream = agent.run_stream(
                 request.message,
                 registry,
@@ -232,6 +233,10 @@ async def chat_stream(
                 tool_result_limit=settings.memory_tool_result_limit,
             )
             async for event in stream:
+                if event["event"] == "checkpoint":
+                    last_checkpoint = event["messages"]
+                    chat_store.save_chat(sid, history + last_checkpoint)
+                    continue
                 if event["event"] == "done":
                     turn_messages = event.get("messages", [])
                 sse_event = {k: v for k, v in event.items() if k != "messages"}
@@ -241,6 +246,12 @@ async def chat_stream(
             chat_store.save_chat(sid, memory.load(sid))
         finally:
             _approval_queues.pop(sid, None)
+            if not turn_messages and last_checkpoint:
+                last_checkpoint.append(
+                    {"role": "assistant", "content": "", "cancelled": True}
+                )
+                memory.append(sid, last_checkpoint)
+                chat_store.save_chat(sid, memory.load(sid))
 
     return EventSourceResponse(event_generator())
 

@@ -18,6 +18,7 @@ interface StoredMessage {
   content?: string | null;
   tool_calls?: StoredToolCall[];
   tool_call_id?: string;
+  cancelled?: boolean;
 }
 
 export function convertStoredMessages(
@@ -67,10 +68,12 @@ export function convertStoredMessages(
 
       // If the next non-tool message is an assistant with content, merge it
       let finalContent = m.content ?? "";
+      let merged: StoredMessage | undefined;
       let skip = i + 1;
       while (skip < raw.length && raw[skip].role === "tool") skip++;
       if (skip < raw.length && raw[skip].role === "assistant" && !raw[skip].tool_calls?.length) {
-        finalContent = raw[skip].content ?? "";
+        merged = raw[skip];
+        finalContent = merged.content ?? "";
       }
 
       result.push({
@@ -78,6 +81,7 @@ export function convertStoredMessages(
         role: "assistant",
         content: finalContent,
         toolCalls,
+        cancelled: merged?.cancelled || undefined,
         timestamp,
       });
       continue;
@@ -96,6 +100,7 @@ export function convertStoredMessages(
         id: makeId(),
         role: "assistant",
         content: m.content ?? "",
+        cancelled: m.cancelled || undefined,
         timestamp,
       });
       continue;
